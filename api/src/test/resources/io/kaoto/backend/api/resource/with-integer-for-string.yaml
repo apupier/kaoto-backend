@@ -1,0 +1,6 @@
+- from:
+    uri: slack:test
+    parameters:
+      maxResults: 1
+    steps: []
+    

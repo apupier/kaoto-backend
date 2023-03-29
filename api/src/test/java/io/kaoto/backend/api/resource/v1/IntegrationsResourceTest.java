@@ -2,9 +2,7 @@ package io.kaoto.backend.api.resource.v1;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -417,4 +415,34 @@ class IntegrationsResourceTest {
         var uri = (String) ((Map)((Map)parsed.get(0)).get("from")).get("uri");
         assertEquals("kamelet:telegram-source:test", uri);
     }
+    
+    @Test
+	void withIntegerLikeForStringComponent() throws Exception {
+    	String yaml = Files.readString(Path.of(
+                IntegrationsResourceTest.class.getResource(
+                                "../with-integer-for-string.yaml")
+                        .toURI()));
+        var res = given()
+                .when()
+                .contentType("text/yaml")
+                .body(yaml)
+                .post("?dsl=Camel Route")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
+        String json = res.extract().body().asString();
+        System.out.println("json:\n"+json);
+        
+        res = given()
+                .when()
+                .contentType("application/json")
+                .body(json)
+                .post("?dsl=Camel Route")
+                .then();
+//                .statusCode(Response.Status.OK.getStatusCode());
+
+        var yaml2 = res.extract().body().asString();
+        System.out.println("yaml:\n"+yaml2);
+        List<Object> parsed = new Yaml().load(yaml2);
+        //TODO: check that the maxResults parameter is set to 1
+	}
 }
